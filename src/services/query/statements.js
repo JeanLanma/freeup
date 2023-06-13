@@ -22,6 +22,13 @@ function getQueryStatement(hotel_name, zone_alias, tour_name) {
 
 }
 
+function insertQueryStatement()
+{
+    return  'INSERT INTO pickups'+
+            ' (id, hotel_id, activity_id, pickup_time, zone_id, created_at, updated_at)'+
+            ' VALUES (null,'+ hotel_id +', '+ activity_id +', '+ pickup_time +', '+ zone_id +', '+ created_at +', '+ updated_at + ')';
+}
+
 module.exports = {
     updateQueryStatement,
     getQueryStatement

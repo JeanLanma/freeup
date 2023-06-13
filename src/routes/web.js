@@ -5,6 +5,7 @@ const pickupController = require('../controllers/pickupController');
 router
     .get('/test', pickupController.test)
     .get('/pickup-update', pickupController.makeUpdateSqlStatement)
-    .get('/pickup-get', pickupController.makeSelectSqlStatement);
+    .get('/pickup-get', pickupController.makeSelectSqlStatement)
+    .get('/pickup-upsert', pickupController.makeUpsertSqlStatement);
 
 module.exports = router;
