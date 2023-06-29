@@ -28,7 +28,11 @@ function isValidPickupTime(pickup_time){
     return regex.test(pickup_time);
 }
 
-async function validateUpsertRequest(req, res, next){
+async function requestHasErrors(UpsertRequest){
+        return await validateUpsertRequest(UpsertRequest) > 0;
+}
+
+async function validateUpsertRequest(req){
 
     const errors = [];
 
@@ -48,13 +52,10 @@ async function validateUpsertRequest(req, res, next){
         errors.push('pickup_time is required and must be formatted as HH:MM i.e. 00:00');
     }
 
-    if(errors.length > 0){
-        return res.status(400).json({errors});
-    }
-
-    return true;
+    return errors;
 }
 
 module.exports = {
-    validateUpsertRequest
+    validateUpsertRequest,
+    requestHasErrors,
 }

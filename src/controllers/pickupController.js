@@ -1,7 +1,7 @@
 const statementQueryService = require('../services/query/statements')
 const pcikupModel = require('../models/pickup')
 const { usePrepareGetParams, formatPickupTime, usePrepareUpdateParams, resultMessage } = require('../services/utils');
-const { validateUpsertRequest } = require('../services/validators/upsertRequest');
+const { validateUpsertRequest, requestHasErrors } = require('../services/validators/upsertRequest');
 
 async function test(req, res){
     const {hotel_name, zone_alias, tour_name} = usePrepareGetParams(req.query);
@@ -31,28 +31,32 @@ async function makeSelectSqlStatement(req, res){
 }
 async function makeUpsertSqlStatement(req, res){
 
-    validateUpsertRequest(req, res);
+    // Validating errors
+    const requestHasErrors = await validateUpsertRequest(req);
+    if(requestHasErrors.length > 0) return res.status(422).send(requestHasErrors);
 
+
+    // Preparing Get Statement
     const {hotel_name, zone_alias, tour_name} = usePrepareGetParams(req.query);
     const pickup_time = formatPickupTime(req.query.pickup_time);
-
     let queryGenerated = statementQueryService.getQueryStatement(hotel_name, zone_alias, tour_name);
     try {
         let result = await pcikupModel.getPickUp(queryGenerated);
         
+        // Query success, but 0 results found
         if(result.length == 0){
             return res.status(404).send({ error: 'No se encontro ningun resultado', queryGenerated });
         }
 
+        // Query success, results found but pickup_time is the same
         if(result[0].pickup_time.slice(0,5) == pickup_time){
-            res.send({msessage: 'No se realizo ningun cambio', queryGenerated, result});
-            return;
+            return res.send({msessage: 'No se realizo ningun cambio', queryGenerated, result});
         }
 
+        // Preparing Update Statement
         queryGenerated = statementQueryService.updateQueryStatement(pickup_time, hotel_name, zone_alias, tour_name);
         result = await pcikupModel.updatePickup(queryGenerated);
-        res.send({message: 'Cambios realizados correctamte', queryGenerated, result});
-        return;
+        return res.send({message: 'Cambios realizados correctamte', queryGenerated, result});
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: 'Hubo un error al realizar la consulta', queryGenerated });
