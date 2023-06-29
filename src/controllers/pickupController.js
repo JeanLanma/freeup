@@ -1,6 +1,6 @@
 const statementQueryService = require('../services/query/statements')
 const pcikupModel = require('../models/pickup')
-const { usePrepareGetParams, formatPickupTime, usePrepareUpdateParams } = require('../services/utils');
+const { usePrepareGetParams, formatPickupTime, usePrepareUpdateParams, resultMessage } = require('../services/utils');
 const { validateUpsertRequest } = require('../services/validators/upsertRequest');
 
 async function test(req, res){
@@ -59,9 +59,22 @@ async function makeUpsertSqlStatement(req, res){
     }
 }
 
+async function makeDetailGetQueryStatement(req, res) {
+    const {hotel_name, zone_alias, tour_name} = usePrepareGetParams(req.query);
+    const queryGenerated = statementQueryService.getDetailQueryStatement(hotel_name, zone_alias, tour_name);
+    try {
+        const result = await pcikupModel.getPickUp(queryGenerated);
+        res.send({query: queryGenerated, result: result, message: resultMessage(result[0])});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: 'Hubo un error al realizar la consula', queryGenerated });
+    }
+}
+
 module.exports = {
     test,
     makeUpdateSqlStatement,
     makeSelectSqlStatement,
     makeUpsertSqlStatement,
+    makeDetailGetQueryStatement,
 }

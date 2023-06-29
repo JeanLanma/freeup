@@ -48,8 +48,21 @@ function formatPickupTime(pickup_time){
 
 }
 
+function resultMessage(result){
+
+    if(result != null){
+        return  'El hotel '+ result.hotel_name +
+                ' tiene pickup a las ' + result.pickup_time.slice(0,5) +
+                ' para ' + result.tour_name +
+                ' en la zona ' + result.zone_alias +
+                ' [' + result.zone_name.charAt(0).toUpperCase() + result.zone_name.slice(1) + ']';
+    }
+
+}
+
 module.exports = {
     usePrepareGetParams,
     usePrepareUpdateParams,
     formatPickupTime,
+    resultMessage,
 }
