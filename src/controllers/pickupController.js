@@ -1,7 +1,9 @@
 const statementQueryService = require('../services/query/statements')
 const pcikupModel = require('../models/pickup')
 const { usePrepareGetParams, formatPickupTime, usePrepareUpdateParams, resultMessage } = require('../services/utils');
-const { validateUpsertRequest, requestHasErrors } = require('../services/validators/upsertRequest');
+const { validateUpsertRequest } = require('../services/validators/upsertRequest');
+const { useValidator } = require('../services/validators/validator');
+const { getHotelByName } = require('../services/query/hotelsGet');
 
 async function test(req, res){
     const {hotel_name, zone_alias, tour_name} = usePrepareGetParams(req.query);
@@ -75,10 +77,24 @@ async function makeDetailGetQueryStatement(req, res) {
     }
 }
 
+async function makeInsertPickupStatement(req, res) {
+
+    const hotel = useValidator(req.body.hotel_name, 'Hotel name')
+                    .required()
+                    .string();
+
+    if(hotel.hasErrors()) return res.status(422).send({errors: hotel.getErrors(), val: hotel.getValue()});
+
+    const queryGenerated = getHotelByName(hotel.getValue());
+    const result = await pcikupModel.execute(queryGenerated);
+    return res.send({resul: result,queryGenerated, message: 'Todo bien', hotel: hotel.getValue()});
+};
+
 module.exports = {
     test,
     makeUpdateSqlStatement,
     makeSelectSqlStatement,
     makeUpsertSqlStatement,
     makeDetailGetQueryStatement,
+    makeInsertPickupStatement,
 }

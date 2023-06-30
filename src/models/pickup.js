@@ -20,8 +20,17 @@ async function getPickUp(QueryString){
     });
 }
 
+async function execute(QueryString){
+    return new Promise((resolve, reject) => {
+        connection.query(QueryString, (err, rows, fields) => {
+            if (err) reject(err);
+            resolve(rows);
+        });
+    });
+}
 
 module.exports = {
+    execute,
     getPickUp,
     updatePickup
 }

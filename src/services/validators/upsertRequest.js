@@ -58,4 +58,8 @@ async function validateUpsertRequest(req){
 module.exports = {
     validateUpsertRequest,
     requestHasErrors,
+    isValidPickupTime,
+    isValidZoneAlias,
+    empty,
+    isset
 }
